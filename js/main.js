@@ -1,52 +1,32 @@
-let list = document.querySelector("#list");
+import Card from "./crud.js";
 
-//Event listeners after after updating the DOM
-document.querySelector("form").addEventListener("submit", (e) => {
-  e.preventDefault();
+// listening to the form on SubmitEvent
+document.querySelector("form").addEventListener("submit", async (e) => {
   list.innerText = "My WishList";
+  //Form Inputs
+  const name = e.target.elements["name"].value;
+  const location = e.target.elements["location"].value;
+  const photo = e.target.elements["photo"].value;
+  const description = e.target.elements["description"].value;
 
-  let name = e.target.elements["name"].value;
-  let location = e.target.elements["location"].value;
-  let photo = e.target.elements["photo"].value;
-  let description = e.target.elements["description"].value;
+  //New App object
+  const app = new Card(name, location, photo, description);
 
-  cardContainer.innerHTML += `<div class="card" id = "card">
-     <img class="card-img-top" alt="locationPhoto" src="${photo}">
-     <div class="card-body">
-         <h5 class="card-title">${name}</h5>
-         <h6 class="card-subtitle mb-2 text-muted">${location}</h6>
-         <p class="card-text">${description}</p>
-         <div class="options">
-             <button class="btn btn-warning edit" >Edit</button>
-             <button class="btn btn-danger delete">Remove</button>
-         </div>
-     </div>
- </div>`;
-
+  //form handlers
+  e.preventDefault();
   e.target.reset();
-  document.querySelectorAll(".delete").forEach((item) => item.addEventListener("click", deleteItem));
-  document.querySelectorAll(".edit").forEach((item) => item.addEventListener("click", editItem));
+  //   changing the DOM adding a new item that is being created with .creatItem()
+  cardContainer.innerHTML += await app.creatItem();
+
+  save(cardContainer.innerHTML);
+  //Getting all the buttons from the new item after creation
+  const deleteButton = document.querySelectorAll(".delete");
+  const editButton = document.querySelectorAll(".edit");
+  // adding listers to the buttons that will give them the avility to call delete() and create() method in App
+  app.itemListener(deleteButton, app.deleteItem);
+  app.itemListener(editButton, app.editItem);
 });
 
-function deleteItem(e) {
-  e.target.parentElement.parentElement.parentElement.remove();
-}
-
-function editItem(e) {
-  let cardBody = e.target.parentElement.parentElement;
-  let title = cardBody.children[0];
-  let location = cardBody.children[1];
-  let description = cardBody.children[2];
-  let card = cardBody.parentElement;
-  let photoUrl = card.children[0];
-
-  let editedTitle = window.prompt("Enter new name");
-  let editedLocation = window.prompt("Enter new location");
-  let editedPhoto = window.prompt("Enter new photo url");
-  let editedDescription = window.prompt("Enter new description");
-
-  title.innerText = editedTitle;
-  description.innerText = editedDescription;
-  location.innerText = editedLocation;
-  photoUrl.setAttribute("src", editedPhoto);
+function save(items) {
+  localStorage.setItem("cards", items);
 }
